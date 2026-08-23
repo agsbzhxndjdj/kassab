@@ -37,24 +37,43 @@ jobs:
       - name: 📦 Get dependencies
         run: flutter pub get
 
-      # ✅✅ الإصلاح الجديد ✅✅
-      # 5️⃣ حذف مجلد أندرويد القديم (قالبه غير مدعوم من نسخة السيرفر)
+      # 5️⃣ حذف مجلد أندرويد القديم
       - name: 🗑️ Remove outdated Android folder
         run: rm -rf android
 
-      # 6️⃣ توليد مجلد أندرويد جديد مطابق لنسخة Flutter في السيرفر
+      # 6️⃣ توليد مجلد أندرويد جديد
       - name: 🔄 Regenerate Android project
         run: flutter create --platforms android --org com.kassab .
 
-      # 7️⃣ بناء APK نهائي
+      # ✅✅ الإصلاح الجديد ✅✅
+      # 7️⃣ تحديث Kotlin و SDK versions لتوافق الحزم الحديثة
+      - name: 🆙 Update Kotlin and SDK versions
+        run: |
+          # تحديث Kotlin في settings.gradle (الطريقة الجديدة)
+          sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "2.0.21"/' android/settings.gradle
+          
+          # تحديث Kotlin في build.gradle (الطريقة القديمة)
+          sed -i "s/ext.kotlin_version = '[0-9.]*'/ext.kotlin_version = '2.0.21'/" android/build.gradle 2>/dev/null || true
+          
+          # تحديث compileSdk و targetSdk إلى 34 (مطلوب من حزم حديثة)
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle
+          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 34/' android/app/build.gradle
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/' android/app/build.gradle
+          sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 34/' android/app/build.gradle
+          
+          # تحديث minSdk إلى 21 (لتوافق أحدث الحزم)
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/' android/app/build.gradle
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/' android/app/build.gradle
+
+      # 8️⃣ بناء APK نهائي
       - name: 🏗️ Build Release APK
         run: flutter build apk --release --split-per-abi
 
-      # 8️⃣ بناء App Bundle (لـ Play Store)
+      # 9️⃣ بناء App Bundle (لـ Play Store)
       - name: 📦 Build App Bundle (AAB)
         run: flutter build appbundle --release
 
-      # 9️⃣ رفع ملفات APK
+      # 🔟 رفع ملفات APK
       - name: 📤 Upload APKs
         uses: actions/upload-artifact@v4
         with:
@@ -66,7 +85,7 @@ jobs:
           retention-days: 30
           if-no-files-found: warn
 
-      # 🔟 رفع AAB
+      # 1️⃣1️⃣ رفع AAB
       - name: 📤 Upload App Bundle
         uses: actions/upload-artifact@v4
         with:
@@ -74,7 +93,7 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
-      # 🏷️ Release تلقائي عند عمل Tag
+      # 1️⃣2️⃣ Release تلقائي عند عمل Tag
       - name: 🚀 Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
