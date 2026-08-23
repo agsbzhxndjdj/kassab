@@ -1,0 +1,91 @@
+name: Build Kassab APK 🎯
+
+on:
+  # يعمل عند الضغط على أي commit في الفرع الرئيسي
+  push:
+    branches: [ "main", "master" ]
+    tags: [ "v*.*.*" ]  # أيضاً عند إصدار نسخة (مثلاً: v1.0.0)
+  
+  # يعمل عند فتح Pull Request
+  pull_request:
+    branches: [ "main", "master" ]
+  
+  # زر يدوي لتشغيل البناء متى شئت من صفحة Actions
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    name: Build Android APK 📱
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1️⃣ جلب الكود من المستودع
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ إعداد Java 17 (مطلوب من Flutter الحديث)
+      - name: ☕ Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3️⃣ إعداد Flutter SDK (النسخة المستقرة)
+      - name: 🐦 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.24.0'
+          cache: true
+
+      # 4️⃣ تفعيل أوامر الأندرويد
+      - name: 🔧 Enable Android toolchain
+        run: flutter doctor -v
+
+      # 5️⃣ تثبيت التبعيات (pubspec.yaml)
+      - name: 📦 Get dependencies
+        run: flutter pub get
+
+      # 6️⃣ تنظيف أي بناء قديم
+      - name: 🧹 Clean project
+        run: flutter clean
+
+      # 7️⃣ بناء APK نهائي (release + split per ABI = حجم أصغر)
+      - name: 🏗️ Build Release APK
+        run: flutter build apk --release --split-per-abi
+
+      # 8️⃣ بناء App Bundle (اختياري — مفيد لرفعه على Play Store)
+      - name: 📦 Build App Bundle (AAB)
+        run: flutter build appbundle --release
+
+      # 9️⃣ رفع ملفات APK كـ Artifacts قابلة للتحميل من GitHub
+      - name: 📤 Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: kassab-apks
+          path: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+          retention-days: 30
+          if-no-files-found: warn
+
+      # 🔟 رفع AAB (Play Store)
+      - name: 📤 Upload App Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: kassab-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      # 🏷️ (اختياري) إنشاء Release تلقائي عند Tag مثل v1.0.0
+      - name: 🚀 Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/bundle/release/*.aab
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
