@@ -306,11 +306,11 @@ class _KapsScreenState extends State<KapsScreen> with TickerProviderStateMixin {
             ),
 
             // يد الخصم (أعلى)
-            const Positioned(
+            Positioned(
                 top: -30,
                 right: 30,
                 child: Transform.scale(
-                    scale: -1, child: _Hand(color: Color(0xFF8D5A3B)))),
+                    scale: -1, child: _Hand(color: const Color(0xFF8D5A3B)))),
 
             // يدي أنا (أسفل)
             Positioned(
