@@ -1,0 +1,25 @@
+name: kassab
+description: "كَسّاب - لعبة الحارات الكلاسيكية (كبس / صورة ولا فاضي / تخمين) على الجوال"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  shared_preferences: ^2.2.2
+  # firebase_core: ^2.24.0      # الدفعة 4: الأونلاين
+  # firebase_database: ^10.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  # assets:                    # فعّلها بعد إضافة المجلدات
+  #   - assets/cards/
