@@ -276,19 +276,19 @@ class MenuScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 64,
-              height: 64,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF2B1B0E),
-                border: Border.all(color: Color(0xFFB33A2B), width: 5),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black54,
-                      blurRadius: 8,
-                      offset: Offset(0, 4))
-                ],
-              ),
+  width: 64,
+  height: 64,
+  decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    color: const Color(0xFF2B1B0E),
+    border: Border.all(color: const Color(0xFFB33A2B), width: 5),
+    boxShadow: const [
+      BoxShadow(
+          color: Colors.black54,
+          blurRadius: 8,
+          offset: Offset(0, 4))
+    ],
+  ),
               child: const Center(
                   child: Text('كَسّاب',
                       style: TextStyle(
